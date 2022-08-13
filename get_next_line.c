@@ -6,13 +6,13 @@
 /*   By: marolive <marolive@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/10 22:13:45 by marolive          #+#    #+#             */
-/*   Updated: 2022/08/11 08:25:59 by marolive         ###   ########.fr       */
+/*   Updated: 2022/08/13 07:35:03 by marolive         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*buf_line(int fd, char *line)
+static char	*buf_line(int fd, char *line)
 {
 	char	*buffer;
 	int		count;
@@ -24,26 +24,25 @@ char	*buf_line(int fd, char *line)
 	while (count && !ft_strchr(line, '\n'))
 	{
 		count = read(fd, buffer, BUFFER_SIZE);
-		if (count <= 0)
-		{
-			free(buffer);
-			return (NULL);
-		}
+		if (count < 0)
+			break;
 		buffer[count] = '\0';
 		line = ft_strjoin(line, buffer);
 	}
 	free(buffer);
+	if (count < 0)
+		return (NULL);
 	return (line);
 }
 
-char	*get_line(char *line)
+static char	*get_line(char *line)
 {
 	char	*malline;
 	int		i;
 
-	i = 0;
-	if (!line[i])
+	if (!*line)
 		return (NULL);
+	i = 0;
 	while (line[i]  && line[i] != '\n')
 		i++;
 	malline = (char *)malloc(sizeof(char) * (i + 2));
@@ -59,7 +58,7 @@ char	*get_line(char *line)
 	return (malline);
 }
 
-char	*res_line(char *line)
+static char	*res_line(char *line)
 {
 	char	*resmall;
 	int		i;
@@ -73,7 +72,7 @@ char	*res_line(char *line)
 		free(line);
 		return (NULL);
 	}
-	resmall = (char *)malloc(sizeof(char) * (ft_strlen(line) - i + 1));
+	resmall = (char *)malloc(sizeof(char) * ((ft_strlen(line) - i) + 1));
 	if (!resmall)
 		return (NULL);
 	i++;
@@ -90,7 +89,7 @@ char	*get_next_line(int fd)
 	static char		*line;
 	char			*buff;
 
-	if (read(fd, 0, 0) <= 0 || BUFFER_SIZE <= 0)
+	if (read(fd, 0, 0) < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
 	line = buf_line(fd, line);
 	if (!line)
@@ -99,3 +98,22 @@ char	*get_next_line(int fd)
 	line = res_line(line);
 	return (buff);
 }
+
+/* #include <stdio.h>
+#include <fcntl.h>
+
+int main (void)
+{
+	int fd;
+	char *line;
+	
+	fd = open("nl", O_RDONLY);
+	while (1)
+	{
+		line = get_next_line(fd);
+		printf("%s", line);
+		if (!(line))
+			break ;
+	}
+	return 0;
+} */
