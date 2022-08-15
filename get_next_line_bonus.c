@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: marolive <marolive@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/08/10 22:13:45 by marolive          #+#    #+#             */
-/*   Updated: 2022/08/15 16:55:11 by marolive         ###   ########.fr       */
+/*   Created: 2022/08/15 16:51:43 by marolive          #+#    #+#             */
+/*   Updated: 2022/08/15 19:43:59 by marolive         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 static char	*buf_line(int fd, char *line)
 {
@@ -86,35 +86,15 @@ static char	*res_line(char *line)
 
 char	*get_next_line(int fd)
 {
-	static char		*line;
+	static char		*line[FD_MAX];
 	char			*buff;
 
 	if (read(fd, 0, 0) < 0 || BUFFER_SIZE <= 0)
 		return (NULL);
-	line = buf_line(fd, line);
-	if (!line)
+	line[fd] = buf_line(fd, line[fd]);
+	if (!line[fd])
 		return (NULL);
-	buff = get_line(line);
-	line = res_line(line);
+	buff = get_line(line[fd]);
+	line[fd] = res_line(line[fd]);
 	return (buff);
 }
-/*
-#include <stdio.h>
-#include <fcntl.h>
-
-int main (void)
-{
-	int fd;
-	char *line;
-	
-	fd = open("hahaha.txt", O_RDONLY);
-	while (1)
-	{
-		line = get_next_line(fd);
-		printf("%s", line);
-		if (!(line))
-			break ;
-	}
-	return 0;
-}
-*/
